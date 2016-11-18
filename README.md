@@ -17,8 +17,8 @@ Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes
 ## Usage:
 
 
-This library comes with operational metric counters to measure how application perform. Gmetric service exposes the counter via grpc or Rest endpoint.
-It can be used to measure various aspects of the application, for instance execution time of  methods,  size of processed data, etc.
+This library comes with operational metric counters to measure how application perform. Gmetric service exposes the metrics via grpc or Rest endpoint.
+Gmetric service can be used to measure various aspects of the application, for instance execution time of time critical methods,  size of processed data, etc.
 
 ```go
 
