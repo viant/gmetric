@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.viant.cce";
+option java_outer_classname = "domain";
+
+
+package gmetric;
+
+//OperationMetric applicaiton performance operation counter
+message OperationMetric{
+    string name = 1;//metric name
+    string unit = 2;//metric unit
+    string description = 3;//metric desciption
+    int64 errorCount = 4; //total error count
+    int64 count = 5; //total count
+    repeated int64 recentValues = 6; //recent operation value
+    repeated int64 averages = 7; //operation averages, this could be anything for instance size or latency data
+}
+
+//KeyedOperationMetric applicaiton performance operation counter by type(key)
+message KeyedOperationMetric{
+    map<string, OperationMetric> metrics = 1;
+}
+
+//OperationMetricPackage operation metric pacakge
+message OperationMetricPackage {
+    string name = 1;
+    map<string, OperationMetric> metrics = 2;
+    map<string, KeyedOperationMetric> keyedMetrics = 3;
+}

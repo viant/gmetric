@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.viant.gmetric";
+option java_outer_classname = "service";
+
+import "service_contract.proto";
+
+import "google/api/annotations.proto";
+
+
+package gmetric;
+
+// protoc -I  ./proto/   ./proto/*.proto --gofast_out=plugins=grpc:.
+// protoc -I/usr/local/include -I. -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I ./proto/  --go_out=Mgoogle/api/annotations.proto=github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api,plugins=grpc:. ./proto/service.proto
+// protoc -I/usr/local/include -I. -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I ./proto/  --grpc-gateway_out=logtostderr=true:. ./proto/service.proto
+
+//Service represent an application performance operaional metrics service.
+service Service {
+
+    //Get requests requests operation metrics
+    rpc Query (QueryRequest) returns (QueryResponse) {
+        option (google.api.http) = {
+	      	  post: "/v1/gmetric/query"
+    		  body: "*"
+        };
+    }
+}

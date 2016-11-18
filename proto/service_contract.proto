@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.viant.cce";
+option java_outer_classname = "domain";
+
+
+
+import "domain.proto";
+
+package gmetric;
+
+
+
+// The ResponseInfo message containing generic performance response detail
+message QueryRequest {
+    string query = 1;
+}
+
+
+// The ChangeDataset message containing the data difference between upstream node and current sync node details supplied with the sync request.
+message QueryResponse {
+    string error = 1;
+    map<string, OperationMetricPackage> metrics = 2;
+}
+
