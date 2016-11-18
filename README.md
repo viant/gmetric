@@ -8,17 +8,24 @@ This library is compatible with Go 1.5+
 
 Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes.
 
+- [Motivation](#Motivation)
 - [Usage](#Usage)
 - [License](#License)
 - [Credits and Acknowledgements](#Credits-and-Acknowledgements)
 
 
+<a name="Motivation"></a>
+## Motivation:
 
+In high performed application it is critical to measure and expose various asepct of the application like
+time taken or data size processed, number failures etc.. .
+
+This library comes with operational counters to measure how application perform, with 
+Gmetric service to expose the metrics via grpc or Rest endpoint.
+
+<a name="Usage"></a>
 ## Usage:
 
-
-This library comes with operational metric counters to measure how application perform. Gmetric service exposes the metrics via grpc or Rest endpoint.
-Gmetric service can be used to measure various aspects of the application, for instance execution time of time critical methods,  size of processed data, etc.
 
 ```go
 
@@ -31,7 +38,8 @@ Gmetric service can be used to measure various aspects of the application, for i
 
 	var grpcPort, restPort = (8876, 8877)
 	server, err := gmetric.NewServer(grpcPort, restPor)
-
+    err = server.Start()
+    
 
 //register individual operation metrics counters
 	someFuncLatency := server.Service().RegisterCounter("com/viant/app1", "someFuncLatency", "ns", "Time taken by some func in ns.", 10, nil)
