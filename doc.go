@@ -4,8 +4,7 @@ package gmetric
 
 Package gmetric - Operation metric for go
 
-This library comes with operational metric counters to meassure how application perform. Gmetric service exposes the counter via grpc or Rest endpoint.
-
+This library comes with operational metric counters to measure how application perform. Gmetric service exposes the counter via grpc or Rest endpoint.
 
 It can be used to measure various aspects of the application, for instance execution time of  methods,  size of processed data, etc.
 
