@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync/atomic"
+	"time"
 )
 
 //Server represents operation counter server.
@@ -22,6 +23,7 @@ type Server struct {
 	isRunning       int32
 	netListener     net.Listener
 	restNetListener net.Listener
+	cancelFunc      context.CancelFunc
 }
 
 //Service returns a operation counter service
@@ -58,8 +60,7 @@ func (s *Server) Start() (err error) {
 
 	go func() {
 		ctx := context.Background()
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
+		ctx, s.cancelFunc = context.WithCancel(ctx)
 
 		mux := runtime.NewServeMux()
 		opts := []grpc.DialOption{grpc.WithInsecure()}
@@ -84,9 +85,12 @@ func (s *Server) Start() (err error) {
 func (s *Server) Stop() (err error) {
 	fmt.Printf("%v(%v) stopping\n", ApplicationName, ApplicationVersion)
 	atomic.StoreInt32(&s.isRunning, 0)
-	if s.restNetListener != nil {
-		err = s.restNetListener.Close()
+	s.cancelFunc()
+
+	if s.cancelFunc != nil {
+		s.cancelFunc()
 	}
+	time.Sleep(100 * time.Millisecond)
 	if s.netListener != nil {
 		err = s.netListener.Close()
 		s.server.Stop()
