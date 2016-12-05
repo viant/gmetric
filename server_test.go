@@ -55,7 +55,9 @@ func TestServiceClient_Query(t *testing.T) {
 		var response = &gmetric.QueryResponse{}
 		err = toolbox.RouteToServiceWithCustomFormat("POST", "http://localhost:8877/v1/gmetric/query", request, response, toolbox.NewJSONEncoderFactory(), toolbox.NewJSONDecoderFactory())
 
+
 	}
 	err = server.Stop()
 	assert.Nil(t, err)
+		
 }

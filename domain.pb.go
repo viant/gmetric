@@ -216,7 +216,7 @@ func (m *KeyedOperationMetric) MarshalTo(data []byte) (int, error) {
 	var l int
 	_ = l
 	if len(m.Metrics) > 0 {
-		for k := range m.Metrics {
+		for k, _ := range m.Metrics {
 			data[i] = 0xa
 			i++
 			v := m.Metrics[k]
@@ -268,7 +268,7 @@ func (m *OperationMetricPackage) MarshalTo(data []byte) (int, error) {
 		i += copy(data[i:], m.Name)
 	}
 	if len(m.Metrics) > 0 {
-		for k := range m.Metrics {
+		for k, _ := range m.Metrics {
 			data[i] = 0x12
 			i++
 			v := m.Metrics[k]
@@ -296,7 +296,7 @@ func (m *OperationMetricPackage) MarshalTo(data []byte) (int, error) {
 		}
 	}
 	if len(m.KeyedMetrics) > 0 {
-		for k := range m.KeyedMetrics {
+		for k, _ := range m.KeyedMetrics {
 			data[i] = 0x1a
 			i++
 			v := m.KeyedMetrics[k]
