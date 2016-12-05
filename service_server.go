@@ -23,7 +23,7 @@ func applySummary(pkg *OperationMetricPackage) {
 			metric := *metricPointer
 			metric.Averages = nil
 			metric.RecentValues = nil
-			pkg.KeyedMetrics[metricKey].Metrics[k] = &metric
+			keyMetric.Metrics[k] = &metric
 		}
 		pkg.KeyedMetrics[metricKey] = &keyMetric
 	}
@@ -88,7 +88,7 @@ func applyUnits(pkg *OperationMetricPackage, unit string) {
 			applyUnit(&metric, unit)
 			metric.Averages = nil
 			metric.RecentValues = nil
-			pkg.KeyedMetrics[metricKey].Metrics[k] = &metric
+			keyMetric.Metrics[k] = &metric
 		}
 		pkg.KeyedMetrics[metricKey] = &keyMetric
 	}

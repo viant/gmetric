@@ -92,7 +92,6 @@ func (s *counterService) Query(queryExpression string) (map[string]*OperationMet
 
 	for k, v := range s.Map {
 		if expression.packageExpr == k || expression.packageExpr == "*" {
-
 			if expression.metricExpr == "*" {
 				result[k] = v.OperationMetricPackage
 			} else {
