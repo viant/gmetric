@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+const MaxInt = int64(^uint(0) >> 1)
+const MinInt = -(MaxInt - 1)
+
 //OperationCounter represents a application operation counter
 type OperationCounter struct {
 	*OperationMetric
@@ -28,27 +31,59 @@ func (t *OperationCounter) AddFromSource(valueSource interface{}, err error) {
 	t.Add(value, err)
 }
 
+func (t *OperationCounter) computeRecentMetrics(limit int) (avg, min, max int64) {
+	var cumulative int64 = 0
+	min = MaxInt
+	max = MinInt
+	for i := 0; i < limit; i++ {
+		recentValue := atomic.LoadInt64(&t.RecentValues[i])
+		cumulative = cumulative + recentValue
+		if recentValue != 0 && recentValue < min {
+			min = recentValue
+		}
+		if recentValue > max {
+			max = recentValue
+		}
+	}
+	return cumulative / int64(limit), min, max
+}
+
 //Add add a value to counter.
 func (t *OperationCounter) Add(value int, err error) {
 	if err != nil {
-		atomic.AddInt64(&t.ErrorCount, 1)
+		atomic.AddUint64(&t.ErrorCount, 1)
 	}
 	operationLength := len(t.RecentValues)
 	timeTakenAvgLength := len(t.Averages)
-	var count = atomic.LoadInt64(&t.Count)
-	if !atomic.CompareAndSwapInt64(&t.Count, count, count+1) {
+	var count = atomic.LoadUint64(&t.Count)
+	if !atomic.CompareAndSwapUint64(&t.Count, count, count+1) {
 		t.Add(value, err)
 		return
 	}
 	if operationLength > 0 {
-		if int(count) > 0 && (int(count)%operationLength) == 0 {
-			var cumulative int64
-			for i := 0; i < operationLength; i++ {
-				cumulative = cumulative + atomic.LoadInt64(&t.RecentValues[i])
+		if int(count) > 0 {
+
+			var limit = operationLength
+			if (int(count) % operationLength) > 0 {
+				limit = int(count) % operationLength
 			}
-			avgIndex := int(t.averageIndex) % timeTakenAvgLength
-			atomic.StoreInt64(&t.Averages[avgIndex], cumulative/int64(operationLength))
-			atomic.AddInt64(&t.averageIndex, 1)
+			avg, min, max := t.computeRecentMetrics(limit)
+
+			if (int(count) % operationLength) == 0 {
+				avgIndex := int(t.averageIndex) % timeTakenAvgLength
+				atomic.StoreInt64(&t.Averages[avgIndex], avg)
+				atomic.AddInt64(&t.averageIndex, 1)
+			}
+			atomic.StoreInt64(&t.AvgValue, avg)
+			if max == MinInt {
+				max = 0
+			}
+			atomic.StoreInt64(&t.MaxValue, max)
+			if min == MaxInt {
+				min = 0
+			}
+			atomic.StoreInt64(&t.MinValue, min)
+
 		}
 		var index = int(count) % operationLength
 		atomic.StoreInt64(&t.RecentValues[index%operationLength], int64(value))

@@ -12,8 +12,8 @@ func TestOperationMetricCounter_Add(t *testing.T) {
 	counter := gmetric.NewOperationCounter("name", "ns", "test latency", 4, nil)
 	err := testMethod1(10*time.Microsecond, counter, false)
 	assert.Nil(t, err)
-	assert.Equal(t, int64(1), counter.Count)
-	assert.Equal(t, int64(0), counter.ErrorCount)
+	assert.Equal(t, uint64(1), counter.Count)
+	assert.Equal(t, uint64(0), counter.ErrorCount)
 
 	assert.True(t, int(counter.RecentValues[0]) >= 10000)
 
@@ -22,7 +22,7 @@ func TestOperationMetricCounter_Add(t *testing.T) {
 		err = testMethod1(10*time.Microsecond, counter, i%4 == 0)
 	}
 	assert.Nil(t, err)
-	assert.Equal(t, int64(4), counter.ErrorCount)
+	assert.Equal(t, uint64(4), counter.ErrorCount)
 	assert.True(t, int(counter.Averages[0]) >= 10000 && int(counter.Averages[0]) < 1000000)
 }
 
@@ -51,8 +51,8 @@ func TestOperationMetricCounter_AddWithSource(t *testing.T) {
 
 	err = testMethod2(newTestPayload("2"), counter, true)
 	assert.NotNil(t, err)
-	assert.Equal(t, int64(2), counter.Count)
-	assert.Equal(t, int64(1), counter.ErrorCount)
+	assert.Equal(t, uint64(2), counter.Count)
+	assert.Equal(t, uint64(1), counter.ErrorCount)
 	assert.Equal(t, int64(5), counter.RecentValues[0])
 	assert.Equal(t, int64(1), counter.RecentValues[1])
 
@@ -60,6 +60,9 @@ func TestOperationMetricCounter_AddWithSource(t *testing.T) {
 	assert.NotNil(t, err)
 
 	assert.Equal(t, int64(3), counter.Averages[0])
+
+	assert.Equal(t, int64(5), counter.MaxValue)
+	assert.Equal(t, int64(1), counter.MinValue)
 
 	err = testMethod2(newTestPayload("12"), counter, false)
 	assert.Nil(t, err)

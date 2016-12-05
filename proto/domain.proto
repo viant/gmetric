@@ -12,10 +12,13 @@ message OperationMetric{
     string name = 1;//metric name
     string unit = 2;//metric unit
     string description = 3;//metric desciption
-    int64 errorCount = 4; //total error count
-    int64 count = 5; //total count
+    uint64 errorCount = 4; //total error count
+    uint64 count = 5; //total count
     repeated int64 recentValues = 6; //recent operation value
     repeated int64 averages = 7; //operation averages, this could be anything for instance size or latency data
+    int64 avgValue = 8;//revent value bucket average
+    int64 minValue = 9;//min value in the recent average bucket
+    int64 maxValue = 10;//max value in the recent average bucket
 }
 
 //KeyedOperationMetric applicaiton performance operation counter by type(key)

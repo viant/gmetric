@@ -13,13 +13,13 @@ func TestKeyedOperationMetricCounter_AddLatency(t *testing.T) {
 	for _, key := range []string{"k1", "k2"} {
 		err := testKeyedMethod1(10*time.Millisecond, key, counter, false)
 		assert.Nil(t, err)
-		assert.Equal(t, int64(1), counter.Metrics[key].Count)
+		assert.Equal(t, uint64(1), counter.Metrics[key].Count)
 		assert.True(t, counter.Metrics[key].RecentValues[0] >= int64(10))
 
 		err = testKeyedMethod1(10*time.Millisecond, key, counter, true)
 		assert.NotNil(t, err)
-		assert.Equal(t, int64(1), counter.Metrics[key].ErrorCount)
-		assert.Equal(t, int64(2), counter.Metrics[key].Count)
+		assert.Equal(t, uint64(1), counter.Metrics[key].ErrorCount)
+		assert.Equal(t, uint64(2), counter.Metrics[key].Count)
 	}
 }
 
@@ -51,14 +51,14 @@ func TestKeyedOperationMetricCounter_AddFromSource(t *testing.T) {
 		err := testKeyedMethod2(newTestKeyPayload(key, "abcd"), counter, false)
 		assert.Nil(t, err)
 
-		assert.Equal(t, int64(1), counter.Metrics[key].Count)
+		assert.Equal(t, uint64(1), counter.Metrics[key].Count)
 		assert.Equal(t, int64(4), counter.Metrics[key].RecentValues[0])
 	}
 	for _, key := range []string{"k3", "k4"} {
 		err := testKeyedMethod3(newTestKeyPayload(key, "abcd"), counter, false)
 		assert.Nil(t, err)
 
-		assert.Equal(t, int64(1), counter.Metrics[key].Count)
+		assert.Equal(t, uint64(1), counter.Metrics[key].Count)
 		assert.Equal(t, int64(4), counter.Metrics[key].RecentValues[0])
 	}
 }
