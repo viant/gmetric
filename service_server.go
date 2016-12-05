@@ -37,13 +37,13 @@ func applyUnit(metric *OperationMetric, unit string) {
 			divider = int64(time.Millisecond * 1000)
 
 		}
-	case "kbytes":
+	case "kb":
 		if metric.Unit == "bytes" {
 			metric.Unit = unit
 			divider = int64(1000)
 
 		}
-	case "mbytes":
+	case "mb":
 		if metric.Unit == "bytes" {
 			metric.Unit = unit
 			divider = int64(1000000)
