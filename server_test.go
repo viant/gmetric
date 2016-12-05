@@ -59,5 +59,5 @@ func TestServiceClient_Query(t *testing.T) {
 	}
 	err = server.Stop()
 	assert.Nil(t, err)
-		
+
 }

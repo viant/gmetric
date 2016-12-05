@@ -11,11 +11,22 @@ type serviceServer struct {
 
 
 func applySummary(pkg *OperationMetricPackage) {
-	for k,v := range pkg.Metrics {
+	for k, v := range pkg.Metrics {
 		metric := *v
 		metric.Averages = nil
 		metric.RecentValues = nil
-		pkg.Metrics[k]  = &metric
+		pkg.Metrics[k] = &metric
+	}
+
+	for metricKey, v := range pkg.KeyedMetrics {
+		keyMetric := *v
+		for k, metricPointer := range  keyMetric.Metrics {
+			metric := *metricPointer
+			metric.Averages = nil
+			metric.RecentValues = nil
+			pkg.KeyedMetrics[metricKey].Metrics[k]= &metric
+		}
+		pkg.KeyedMetrics[metricKey] = &keyMetric
 	}
 }
 
