@@ -12,7 +12,7 @@ const MinInt = -(MaxInt - 1)
 type OperationCounter struct {
 	*OperationMetric
 	valueProvider ValueProvider
-	averageIndex  int64
+	averageIndex  uint64
 }
 
 //AddLatency adds to counter bifferance between now and start time in ns.
@@ -31,23 +31,6 @@ func (t *OperationCounter) AddFromSource(valueSource interface{}, err error) {
 	t.Add(value, err)
 }
 
-func (t *OperationCounter) computeRecentMetrics(limit int) (avg, min, max float64) {
-	var cumulative int64 = 0
-	min = float64(MaxInt)
-	max = float64(MinInt)
-	for i := 0; i < limit; i++ {
-		recentValue := atomic.LoadInt64(&t.RecentValues[i])
-		cumulative = cumulative + recentValue
-		recentValueFloat := float64(recentValue)
-		if recentValue != 0 && recentValueFloat < min {
-			min = recentValueFloat
-		}
-		if recentValueFloat > max {
-			max = recentValueFloat
-		}
-	}
-	return float64(cumulative) / float64(limit), float64(min), float64(max)
-}
 
 //Add add a value to counter.
 func (t *OperationCounter) Add(value int, err error) {
@@ -68,28 +51,67 @@ func (t *OperationCounter) Add(value int, err error) {
 			if (int(count) % operationLength) > 0 {
 				limit = int(count) % operationLength
 			}
-			avg, min, max := t.computeRecentMetrics(limit)
+
 
 			if (int(count) % operationLength) == 0 {
+				var cumulative int64
+				for i := 0; i < limit; i++ {
+					recentValue := atomic.LoadInt64(&t.RecentValues[i])
+					cumulative = cumulative + recentValue
+				}
 				avgIndex := int(t.averageIndex) % timeTakenAvgLength
-				atomic.StoreInt64(&t.Averages[avgIndex], int64(avg))
-				atomic.AddInt64(&t.averageIndex, 1)
+
+				avg := cumulative / int64(operationLength)
+
+				atomic.StoreInt64(&t.Averages[avgIndex], avg)
+				atomic.AddUint64(&t.averageIndex, 1)
 			}
-			t.AvgValue = avg
-			if max == float64(MinInt) {
-				max = 0
-			}
-			t.MaxValue = max
-			if min == float64(MaxInt) {
-				min = 0
-			}
-			t.MinValue = min
+
 		}
 		var index = int(count) % operationLength
 		atomic.StoreInt64(&t.RecentValues[index % operationLength], int64(value))
 
 	}
 }
+
+
+func (t *OperationMetric) computeRecentMetrics(limit int) (avg, min, max float64) {
+	var cumulative int64 = 0
+	min = float64(MaxInt)
+	max = float64(MinInt)
+	for i := 0; i < limit; i++ {
+		recentValue := atomic.LoadInt64(&t.RecentValues[i])
+		cumulative = cumulative + recentValue
+		recentValueFloat := float64(recentValue)
+		if recentValue != 0 && recentValueFloat < min {
+			min = recentValueFloat
+		}
+		if recentValueFloat > max {
+			max = recentValueFloat
+		}
+	}
+	return float64(cumulative) / float64(limit), float64(min), float64(max)
+}
+
+
+//ComputeSummary computes summary
+func (m *OperationMetric) ComputeSummary() {
+	limit := int(m.Count + m.ErrorCount) % len(m.RecentValues)
+	if limit == 0 {
+		return
+	}
+	avg, min, max := m.computeRecentMetrics(limit)
+	m.AvgValue = avg
+	if max == float64(MinInt) {
+		max = 0
+	}
+	m.MaxValue = max
+	if min == float64(MaxInt) {
+		min = 0
+	}
+	m.MinValue = min
+}
+
 
 //NewOperationCounter create a new operation counter.
 func NewOperationCounter(name, unit, description string, size int, valueProvider ValueProvider) *OperationCounter {

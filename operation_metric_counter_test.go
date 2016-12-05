@@ -61,6 +61,7 @@ func TestOperationMetricCounter_AddWithSource(t *testing.T) {
 
 	assert.Equal(t, int64(3), counter.Averages[0])
 
+	counter.ComputeSummary()
 	assert.Equal(t, float64(5), counter.MaxValue)
 	assert.Equal(t, float64(1), counter.MinValue)
 

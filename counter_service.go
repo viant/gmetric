@@ -67,7 +67,7 @@ func BuildQueryExpression(expression string) *QueryExpression {
 	theLastDotPosition := strings.LastIndex(expression, "/")
 	if theLastDotPosition != -1 {
 		packageExpr := expression[0:theLastDotPosition]
-		metricExpr := expression[theLastDotPosition+1:]
+		metricExpr := expression[theLastDotPosition + 1:]
 		return &QueryExpression{
 			packageExpr: packageExpr,
 			metricExpr:  metricExpr,
@@ -94,17 +94,29 @@ func (s *counterService) Query(queryExpression string) (map[string]*OperationMet
 		if expression.packageExpr == k || expression.packageExpr == "*" {
 			if expression.metricExpr == "*" {
 				result[k] = v.OperationMetricPackage
+				for _, v := range result[k].Metrics {
+					v.ComputeSummary()
+				}
+				for _, v := range result[k].KeyedMetrics {
+					for _, m := range v.Metrics {
+						m.ComputeSummary()
+					}
+				}
 			} else {
 				result[k] = NewSynchronizedOperationMetricPackage(v.Name).OperationMetricPackage
 				//if expression.metricExpr == v.Name
 				for metricName, metric := range v.Metrics {
 					if metricName == expression.metricExpr {
+						metric.ComputeSummary()
 						result[k].Metrics[metricName] = metric
 					}
 				}
 				for metricName, metric := range v.KeyedMetrics {
 					if metricName == expression.metricExpr {
 						result[k].KeyedMetrics[metricName] = metric
+						for _, m := range metric.Metrics {
+							m.ComputeSummary()
+						}
 					}
 				}
 			}
