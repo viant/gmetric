@@ -27,21 +27,25 @@ func applyUnit(metric *OperationMetric, unit string) {
 	switch unit {
 	case "ms":
 		if metric.Unit == "ns" {
+			metric.Unit = unit
 			divider = int64(time.Millisecond)
 
 		}
 	case "s":
 		if metric.Unit == "ns" {
+			metric.Unit = unit
 			divider = int64(time.Millisecond * 1000)
 
 		}
 	case "kbytes":
 		if metric.Unit == "bytes" {
+			metric.Unit = unit
 			divider = int64(1000)
 
 		}
 	case "mbytes":
 		if metric.Unit == "bytes" {
+			metric.Unit = unit
 			divider = int64(1000000)
 
 		}
@@ -62,23 +66,18 @@ func applyUnit(metric *OperationMetric, unit string) {
 	}
 }
 
-func applyUnits(pkg *OperationMetricPackage, unit string) {
-	for k, v := range pkg.Metrics {
-		metric := *v
-		applyUnit(&metric, unit)
-		pkg.Metrics[k] = &metric
-	}
-
-	for metricKey, v := range pkg.KeyedMetrics {
-		keyMetric := *v
-		for k, metricPointer := range keyMetric.Metrics {
-			metric := *metricPointer
-			applyUnit(&metric, unit)
-			metric.Averages = nil
-			metric.RecentValues = nil
-			keyMetric.Metrics[k] = &metric
+func applyUnits(pkg *OperationMetricPackage, units map[string]string) {
+	for _, v := range pkg.Metrics {
+		if unit, found := units[v.Name]; found {
+			applyUnit(v, unit)
 		}
-		pkg.KeyedMetrics[metricKey] = &keyMetric
+	}
+	for _, v := range pkg.KeyedMetrics {
+		for _, metric := range v.Metrics {
+			if unit, found := units[metric.Name]; found {
+				applyUnit(metric, unit)
+			}
+		}
 	}
 }
 
@@ -90,7 +89,7 @@ func (s *serviceServer) Query(context context.Context, request *QueryRequest) (r
 		return response, err
 	}
 
-	if request.Summary || request.Unit != "" {
+	if request.Summary || len(request.Units) > 0 {
 		for k, v := range metrics {
 			metrics[k] = v.Clone()
 		}
@@ -101,9 +100,9 @@ func (s *serviceServer) Query(context context.Context, request *QueryRequest) (r
 
 		}
 	}
-	if request.Unit != "" {
+	if len(request.Units) > 0 {
 		for _, v := range metrics {
-			applyUnits(v, request.Unit)
+			applyUnits(v, request.Units)
 
 		}
 	}
