@@ -10,22 +10,15 @@ type serviceServer struct {
 }
 
 func applySummary(pkg *OperationMetricPackage) {
-	for k, v := range pkg.Metrics {
-		metric := *v
-		metric.Averages = nil
-		metric.RecentValues = nil
-		pkg.Metrics[k] = &metric
+	for _, v := range pkg.Metrics {
+		v.Averages = nil
+		v.RecentValues = nil
 	}
-
-	for metricKey, v := range pkg.KeyedMetrics {
-		keyMetric := *v
-		for k, metricPointer := range keyMetric.Metrics {
-			metric := *metricPointer
+	for _, v := range pkg.KeyedMetrics {
+		for _, metric := range v.Metrics {
 			metric.Averages = nil
 			metric.RecentValues = nil
-			keyMetric.Metrics[k] = &metric
 		}
-		pkg.KeyedMetrics[metricKey] = &keyMetric
 	}
 }
 
@@ -54,23 +47,18 @@ func applyUnit(metric *OperationMetric, unit string) {
 		}
 	}
 
-
 	metric.MaxValue = metric.MaxValue / divider
 	metric.MinValue = metric.MinValue / divider
 	metric.AvgValue = metric.AvgValue / divider
 	if len(metric.RecentValues) > 0 {
-		var values = make([]int64, len(metric.RecentValues))
 		for i, v := range metric.RecentValues {
-			values[i] = v / divider
+			metric.RecentValues [i] = v / divider
 		}
-		metric.RecentValues = values
 	}
 	if len(metric.Averages) > 0 {
-		var values = make([]int64, len(metric.Averages))
 		for i, v := range metric.Averages {
-			values[i] = v / divider
+			metric.Averages[i] = v / divider
 		}
-		metric.Averages = values
 	}
 }
 
@@ -101,18 +89,22 @@ func (s *serviceServer) Query(context context.Context, request *QueryRequest) (r
 		response.Error = err.Error()
 		return response, err
 	}
-	if request.Summary {
+
+	if request.Summary || request.Unit != "" {
 		for k, v := range metrics {
-			pkg := *v
-			applySummary(&pkg)
-			metrics[k] = &pkg
+			metrics[k] = v.Clone()
+		}
+	}
+	if request.Summary {
+		for _, v := range metrics {
+			applySummary(v)
+
 		}
 	}
 	if request.Unit != "" {
-		for k, v := range metrics {
-			pkg := *v
-			applyUnits(&pkg, request.Unit)
-			metrics[k] = &pkg
+		for _, v := range metrics {
+			applyUnits(v, request.Unit)
+
 		}
 	}
 	response.Metrics = metrics
