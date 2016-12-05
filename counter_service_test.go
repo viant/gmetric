@@ -83,6 +83,14 @@ func TestService_Query(t *testing.T) {
 	}
 
 	{
+		//query with metric name
+		packages, err := service.Query("*")
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(packages))
+
+	}
+
+	{
 		//invlaid query with metric name
 		_, err := service.Query("*Metric1")
 		assert.NotNil(t, err)

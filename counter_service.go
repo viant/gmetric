@@ -72,6 +72,11 @@ func BuildQueryExpression(expression string) *QueryExpression {
 			packageExpr: packageExpr,
 			metricExpr:  metricExpr,
 		}
+	} else if expression == "*" {
+		return &QueryExpression{
+			packageExpr: "*",
+			metricExpr:  "*",
+		}
 	}
 	return nil
 }
@@ -86,7 +91,7 @@ func (s *counterService) Query(queryExpression string) (map[string]*OperationMet
 	defer s.mutex.RUnlock()
 
 	for k, v := range s.Map {
-		if expression.packageExpr == k {
+		if expression.packageExpr == k || expression.packageExpr == "*" {
 			if expression.metricExpr == "*" {
 				result[k] = v.OperationMetricPackage
 			} else {
