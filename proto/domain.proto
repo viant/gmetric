@@ -16,9 +16,9 @@ message OperationMetric{
     uint64 count = 5; //total count
     repeated int64 recentValues = 6; //recent operation value
     repeated int64 averages = 7; //operation averages, this could be anything for instance size or latency data
-    int64 avgValue = 8;//revent value bucket average
-    int64 minValue = 9;//min value in the recent average bucket
-    int64 maxValue = 10;//max value in the recent average bucket
+    double avgValue = 8;//revent value bucket average
+    double minValue = 9;//min value in the recent average bucket
+    double maxValue = 10;//max value in the recent average bucket
 }
 
 //KeyedOperationMetric applicaiton performance operation counter by type(key)

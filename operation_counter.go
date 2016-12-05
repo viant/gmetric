@@ -19,7 +19,7 @@ type OperationCounter struct {
 func (t *OperationCounter) AddLatency(startTime time.Time, err error) {
 	operationLength := len(t.RecentValues)
 	if operationLength > 0 {
-		t.Add(int(time.Now().UnixNano()-startTime.UnixNano()), err)
+		t.Add(int(time.Now().UnixNano() - startTime.UnixNano()), err)
 	} else {
 		t.Add(0, err)
 	}
@@ -31,21 +31,22 @@ func (t *OperationCounter) AddFromSource(valueSource interface{}, err error) {
 	t.Add(value, err)
 }
 
-func (t *OperationCounter) computeRecentMetrics(limit int) (avg, min, max int64) {
+func (t *OperationCounter) computeRecentMetrics(limit int) (avg, min, max float64) {
 	var cumulative int64 = 0
-	min = MaxInt
-	max = MinInt
+	min = float64(MaxInt)
+	max = float64(MinInt)
 	for i := 0; i < limit; i++ {
 		recentValue := atomic.LoadInt64(&t.RecentValues[i])
 		cumulative = cumulative + recentValue
-		if recentValue != 0 && recentValue < min {
-			min = recentValue
+		recentValueFloat := float64(recentValue)
+		if recentValue != 0 && recentValueFloat < min {
+			min = recentValueFloat
 		}
-		if recentValue > max {
-			max = recentValue
+		if recentValueFloat > max {
+			max = recentValueFloat
 		}
 	}
-	return cumulative / int64(limit), min, max
+	return float64(cumulative) / float64(limit), float64(min), float64(max)
 }
 
 //Add add a value to counter.
@@ -56,7 +57,7 @@ func (t *OperationCounter) Add(value int, err error) {
 	operationLength := len(t.RecentValues)
 	timeTakenAvgLength := len(t.Averages)
 	var count = atomic.LoadUint64(&t.Count)
-	if !atomic.CompareAndSwapUint64(&t.Count, count, count+1) {
+	if !atomic.CompareAndSwapUint64(&t.Count, count, count + 1) {
 		t.Add(value, err)
 		return
 	}
@@ -71,22 +72,21 @@ func (t *OperationCounter) Add(value int, err error) {
 
 			if (int(count) % operationLength) == 0 {
 				avgIndex := int(t.averageIndex) % timeTakenAvgLength
-				atomic.StoreInt64(&t.Averages[avgIndex], avg)
+				atomic.StoreInt64(&t.Averages[avgIndex], int64(avg))
 				atomic.AddInt64(&t.averageIndex, 1)
 			}
-			atomic.StoreInt64(&t.AvgValue, avg)
-			if max == MinInt {
+			t.AvgValue = avg
+			if max == float64(MinInt) {
 				max = 0
 			}
-			atomic.StoreInt64(&t.MaxValue, max)
-			if min == MaxInt {
+			t.MaxValue = max
+			if min == float64(MaxInt) {
 				min = 0
 			}
-			atomic.StoreInt64(&t.MinValue, min)
-
+			t.MinValue = min
 		}
 		var index = int(count) % operationLength
-		atomic.StoreInt64(&t.RecentValues[index%operationLength], int64(value))
+		atomic.StoreInt64(&t.RecentValues[index % operationLength], int64(value))
 
 	}
 }

@@ -51,9 +51,11 @@ func applyUnit(metric *OperationMetric, unit string) {
 		}
 	}
 
-	metric.MaxValue = metric.MaxValue / divider
-	metric.MinValue = metric.MinValue / divider
-	metric.AvgValue = metric.AvgValue / divider
+	dividerFloat := float64(divider)
+	metric.MaxValue = metric.MaxValue / dividerFloat
+	metric.MinValue = metric.MinValue / dividerFloat
+	metric.AvgValue = metric.AvgValue / dividerFloat
+
 	if len(metric.RecentValues) > 0 {
 		for i, v := range metric.RecentValues {
 			metric.RecentValues [i] = v / divider

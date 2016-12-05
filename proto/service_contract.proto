@@ -16,7 +16,7 @@ package gmetric;
 message QueryRequest {
     string query = 1;
     bool summary = 2;
-    string unit = 3;
+    map<string,string> units = 3;//counter name to unit
 }
 
 
