@@ -16,7 +16,7 @@ func (c *MultiCounter) IncrementValue(value interface{}) int64 {
 	return c.IncrementValueBy(value, 1)
 }
 
-//IncrementValue increments counter
+//DecrementValue decrements counter by 1
 func (c *MultiCounter) DecrementValue(value interface{}) int64 {
 	return c.IncrementValueBy(value, -1)
 }

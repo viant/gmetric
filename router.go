@@ -5,7 +5,8 @@ import (
 	"github.com/viant/toolbox"
 )
 
-func Router(URI string, service *Service) *toolbox.ServiceRouter {
+//NewRouter crates service router
+func NewRouter(URI string, service *Service) *toolbox.ServiceRouter {
 	return toolbox.NewServiceRouter(
 		toolbox.ServiceRouting{
 			HTTPMethod: "GET",

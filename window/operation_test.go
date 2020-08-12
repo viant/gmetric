@@ -12,30 +12,30 @@ import (
 
 func TestOperation_Begin(t *testing.T) {
 	var useCases = []struct {
-		description string
+		description   string
 		recentBuckets int
-		recentUnit time.Duration
-		unit        time.Duration
+		recentUnit    time.Duration
+		unit          time.Duration
 		counter.Provider
-		stats []interface{}
+		stats        []interface{}
 		unknownStats []interface{}
 	}{
 		{
-			description:"single metrics",
-			unit:time.Microsecond,
+			description: "single metrics",
+			unit:        time.Microsecond,
 		},
 		{
-			description:"stats metrics",
-			unit:time.Microsecond,
-			Provider:base.NewProvider("key1", "key2"),
-			stats:[]interface{}{"key1", "key2", errors.New("test")},
+			description: "stats metrics",
+			unit:        time.Microsecond,
+			Provider:    base.NewProvider("key1", "key2"),
+			stats:       []interface{}{"key1", "key2", errors.New("test")},
 		},
 		{
-			description:"stats metrics with unknown value",
-			unit:time.Microsecond,
-			Provider:base.NewProvider("key1", "key2"),
-			stats:[]interface{}{"key1", "key2", errors.New("test")},
-			unknownStats:[]interface{}{"key3"},
+			description:  "stats metrics with unknown value",
+			unit:         time.Microsecond,
+			Provider:     base.NewProvider("key1", "key2"),
+			stats:        []interface{}{"key1", "key2", errors.New("test")},
+			unknownStats: []interface{}{"key3"},
 		},
 	}
 

@@ -8,9 +8,10 @@ import (
 //Provider represents a base provider, note that this provider uses 0 index for an error type.
 type Provider struct {
 	keys []string
-	aMap   map[interface{}]int
+	aMap map[interface{}]int
 }
 
+//Map maps key to index
 func (p *Provider) Map(key interface{}) int {
 	if key == nil {
 		return -1
@@ -19,18 +20,19 @@ func (p *Provider) Map(key interface{}) int {
 		return 0
 	}
 	index, ok := p.aMap[key]
-	if ! ok {
+	if !ok {
 		return -1
 	}
 	return index
 
 }
 
-//Keys  returns mapped keys
+//Keys returns mapped keys
 func (p *Provider) Keys() []string {
 	return p.keys
 }
-//NewBaseProvider
+
+//NewProvider creates a provider for supplied (it always add error at index 0)
 func NewProvider(values ...interface{}) *Provider {
 	values = append([]interface{}{stat.ErrorKey}, values...)
 	var aMap = make(map[interface{}]int)
@@ -39,5 +41,5 @@ func NewProvider(values ...interface{}) *Provider {
 		aMap[item] = i
 		keys[i] = toolbox.AsString(item)
 	}
-	return &Provider{keys:keys, aMap:aMap}
+	return &Provider{keys: keys, aMap: aMap}
 }

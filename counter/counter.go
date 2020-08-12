@@ -2,7 +2,7 @@ package counter
 
 import "sync/atomic"
 
-//Operation represents a counter
+//Counter represents a counter
 type Counter struct {
 	Count int64
 }

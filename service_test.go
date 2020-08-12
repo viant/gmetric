@@ -26,8 +26,6 @@ func errorMod(mod int) func() error {
 	}
 }
 
-
-
 func TestNewCache(t *testing.T) {
 
 	var useCases = []struct {

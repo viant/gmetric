@@ -44,7 +44,7 @@ func (s *Service) LookupOperation(name string) *Operation {
 	return nil
 }
 
-var dummyError = errors.New("dummy")
+var errMetric = errors.New("metric error")
 
 //LookupOperationRecentMetric returns operation metric current bucket value
 func (s *Service) LookupOperationRecentMetric(operationName, metric string) int64 {
@@ -55,7 +55,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	recentIndex := operation.Index(time.Now())
 	counterMetrics := operation.Recent[recentIndex].Counters
 	if metric == stat.CounterValueKey {
-		return  operation.Recent[recentIndex].CountValue()
+		return operation.Recent[recentIndex].CountValue()
 	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
 	if valueIndex >= 0 && valueIndex < len(counterMetrics) {
@@ -64,9 +64,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	return 0
 }
 
-
-
-//LookupOperationMetric returns operation metric cumulative value
+//LookupOperationCumulativeMetric returns operation metric cumulative value
 func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) int64 {
 	operation := s.LookupOperation(operationName)
 	if operation == nil {
@@ -83,12 +81,10 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	return 0
 }
 
-
-
 func (s *Service) getMetricValueIndex(metric string, operation *Operation) int {
 	var metricValue interface{} = metric
 	if metric == stat.ErrorKey {
-		metricValue = dummyError
+		metricValue = errMetric
 	}
 	valueIndex := operation.Provider.Map(metricValue)
 	return valueIndex

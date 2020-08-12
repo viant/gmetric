@@ -17,8 +17,7 @@ func (h *handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-
-//New creates a new metrics
-func Handler(URI string, metrics *Service) http.Handler {
-	return &handler{ServiceRouter: Router(URI, metrics)}
+//NewHandler creates a metric http handler
+func NewHandler(URI string, metrics *Service) http.Handler {
+	return &handler{ServiceRouter: NewRouter(URI, metrics)}
 }

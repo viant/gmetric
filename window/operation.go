@@ -47,7 +47,6 @@ func (c *Operation) Index(atTime time.Time) int32 {
 	return index
 }
 
-
 //NewOperation creates basic rolling window counter
 func NewOperation(recentBuckets int, recentUnit time.Duration, unit time.Duration, provider counter.Provider) Operation {
 	if recentBuckets < 1 {

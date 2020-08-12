@@ -14,4 +14,3 @@ func NormalizeValue(values []interface{}) []interface{} {
 	}
 	return values
 }
-

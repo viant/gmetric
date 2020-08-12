@@ -13,7 +13,7 @@ import (
 
 func ExampleService_Counter() {
 	metrics := gmetric.New()
-	handler := gmetric.Handler("/v1/metrics", metrics)
+	handler := gmetric.NewHandler("/v1/metrics", metrics)
 	http.Handle("/v1/metrics", handler)
 
 	//basic single counter
@@ -67,7 +67,7 @@ func (p *MultiStateStatTestProvider) Map(key interface{}) int {
 
 func ExampleService_MultiOperationCounter() {
 	metrics := gmetric.New()
-	handler := gmetric.Handler("/v1/metrics", metrics)
+	handler := gmetric.NewHandler("/v1/metrics", metrics)
 	http.Handle("/v1/metrics", handler)
 	counter := metrics.MultiOperationCounter("pkg.myapp", "myMultiCounter", "my description", time.Microsecond, time.Minute, 2, &MultiStateStatTestProvider{})
 	go runMultiStateTasks(counter)

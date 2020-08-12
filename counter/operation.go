@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//Emit on done execution
+//OnDone on done callback
 type OnDone func(end time.Time, values ...interface{}) int64
 
 //Operation represents basic metrics
@@ -46,7 +46,6 @@ func (b *Operation) Begin(started time.Time) OnDone {
 		return count
 	}
 }
-
 
 //NewOperation creates operation metrics
 func NewOperation(timeUnit time.Duration, provider Provider) *Operation {

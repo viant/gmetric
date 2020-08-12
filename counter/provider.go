@@ -7,4 +7,3 @@ type Provider interface {
 	//Keys  returns mapped keys
 	Keys() []string
 }
-

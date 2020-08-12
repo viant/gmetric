@@ -1,6 +1,6 @@
 package counter
 
-//ID represents  counter for value
+//Value represents  counter value
 type Value struct {
 	Value string
 	Counter
