@@ -21,10 +21,6 @@ Application metrics can be viewed as cumulative or recent rolling window values.
 All metrics are locking and memory allocation free to provide best possible performance.
 
 
-Example metric:
-
-![Example metrics](images/metrics.png)
-
 
 ## Usage
 
@@ -215,6 +211,13 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/error
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKey
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/cacheCollision
 ```
+
+
+Example metric:
+
+![Example metrics](images/metrics.png =250px)
+
+
 
 ## License
 
