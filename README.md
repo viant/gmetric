@@ -4,7 +4,7 @@
 [![Application operation performance metric.](https://goreportcard.com/badge/github.com/viant/gmetric)](https://goreportcard.com/report/github.com/viant/gmetric)
 [![GoDoc](https://godoc.org/github.com/viant/asc?status.svg)](https://godoc.org/github.com/viant/gmetric)
 
-This library is compatible with Go 1.5+
+This library is compatible with Go 1.12+
 
 Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes.
 
@@ -17,51 +17,194 @@ Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes
 <a name="Motivation"></a>
 ## Motivation:
 
-In high performed application it is critical to measure and expose various asepct of the application like
-time taken or data size processed, number failures etc.. .
-
-This library comes with operational counters to measure how application perform, with 
-Gmetric service to expose the metrics via grpc or Rest endpoint.
+The goal of this project is to provide metrics counters to measure various aspect of the current and recent application behaviours with minimum overhead.  
+All metrics are locking and memory allocation free to provide best possible performance.
 
 <a name="Usage"></a>
+
 ## Usage:
+
+##### Single metric counter
 
 
 ```go
 
+package mypackage
 
-    import (
-       	"github.com/viant/gmetric"
-    )
+import (
+	"errors"
+	"github.com/viant/gmetric"
+	"github.com/viant/gmetric/stat"
+	"log"
+	"math/rand"
+	"net/http"
+	"testing"
+	"time"
+)
 
+func OperationCounterUsage() {
 
+	metrics := gmetric.New()
+	handler := gmetric.Handler("/v1/metrics", metrics)
+	http.Handle("/v1/metrics", handler)
 
-	var grpcPort, restPort = (8876, 8877)
-	server, err := gmetric.NewServer(grpcPort, restPor)
-    err = server.Start()
-    
+	//basic single counter
+	counter := metrics.OperationCounter("pkg.myapp", "mySingleCounter1", "my description", time.Microsecond, time.Minute, 2)
+	go runBasicTasks(counter)
 
-//register individual operation metrics counters
-	someFuncLatency := server.Service().RegisterCounter("com/viant/app1", "someFuncLatency", "ns", "Time taken by some func in ns.", 10, nil)
-	dataSizeProcessedByOtherFunc := server.Service().RegisterCounter("com/viant/app1, "otherFuncDataSize", "ns", ""Data size processed by otherFunc in bytes", 10, nil)
-
-
-
-	func someFunction() (err error) {
-		defer func(startTime time.Time) {
-			someFuncLatency.AddLatency(startTime, err)
-		}(time.Now())
-
-		<<business logic comes herer>>
+	err := http.ListenAndServe(":8080", http.DefaultServeMux)
+	if err != nil {
+		log.Fatal(err)
 	}
+}
 
-
-	func otherFunction(payload []byte) (err error)  {
-		someFuncLatency.Add(len(payload), err)
-		<<business logic comes herer>>
+func runBasicTasks(counter *gmetric.Operation) {
+	for i := 0; i < 1000; i++ {
+		runBasicTask(counter)
 	}
+}
+
+func runBasicTask(counter *gmetric.Operation) {
+	onDone := counter.Begin(time.Now())
+	defer func() {
+		onDone(time.Now())
+	}()
+	time.Sleep(time.Nanosecond)
+
+}
+
 ```
 
+```bash
+open http://127.0.0.1:8080/v1/metrics/counters
+## or 
+open http://127.0.0.1:8080/v1/metrics/counter/mySingleCounter1
+```
+
+##### Multi metric counter
+
+
+
+
+```go
+package gmetric_test
+
+import (
+	"errors"
+	"github.com/viant/gmetric"
+	"github.com/viant/gmetric/counter/base"
+	"github.com/viant/gmetric/stat"
+	"log"
+	"math/rand"
+	"net/http"
+	"testing"
+	"time"
+)
+
+
+
+const (
+	NoSuchKey       = "noSuchKey"
+
+	MyStatsCacheHit       = "cacheHit"
+	MyStatsCacheCollision = "cacheCollision"
+)
+
+
+//MultiStateStatTestProvider represents multi stats value provider
+type MultiStateStatTestProvider struct{ *base.Provider }
+
+//Map maps value int slice index
+func (p *MultiStateStatTestProvider) Map(key interface{}) int {
+	textKey, ok := key.(string)
+	if !ok {
+		return p.Provider.Map(key)
+	}
+	switch textKey {
+	case NoSuchKey:
+		return 1
+	case MyStatsCacheHit:
+		return 2
+	case MyStatsCacheCollision:
+		return 3
+	}
+	return -1
+}
+
+
+func OperationMulriCounterUsage() {
+	metrics := gmetric.New()
+	handler := gmetric.Handler("/v1/metrics", metrics)
+	http.Handle("/v1/metrics", handler)
+	counter := metrics.MultiOperationCounter("pkg.myapp", "myMultiCounter1", "my description", time.Microsecond, time.Minute, 2, &MultiStateStatTestProvider{})
+	go runMultiStateTasks(counter)
+
+	err := http.ListenAndServe(":8080", http.DefaultServeMux)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runMultiStateTasks(counter *gmetric.Operation) {
+	for i := 0; i < 1000; i++ {
+		runMultiStateTask(counter)
+	}
+
+}
+
+func runMultiStateTask(counter *gmetric.Operation) {
+	stats := stat.New()
+	onDone := counter.Begin(time.Now())
+	defer func() {
+		onDone(time.Now(), stats)
+	}()
+
+	time.Sleep(time.Nanosecond)
+	//simulate task metrics state
+	rnd := rand.NewSource(time.Now().UnixNano())
+	state := rnd.Int63() % 3
+	switch state {
+		case 0:
+			stats.Append(NoSuchKey)
+		case 1:
+			stats.Append(MyStatsCacheHit)
+		case 2:
+			stats.Append(MyStatsCacheHit)
+			stats.Append(MyStatsCacheCollision)
+	}
+	if rnd.Int63() % 10 == 0 {
+		stats.Append(errors.New("test error"))
+	}
+}
+```
+
+```bash
+
+### all operations counters
+open http://127.0.0.1:8080/v1/metrics/operations
+
+
+## indivual operation multi counter
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1
+
+
+## cumulative indivual operation multi counter metric value
+
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/counter
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/error
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/noSuchKey
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/cacheCollision
+
+
+
+## recent counter 
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/counter
+
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/counter
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/error
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKey
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/cacheCollision
+```
 
 <a name="License"></a>
 ## License
@@ -78,4 +221,3 @@ all compatible with Apache License, Version 2. Please see individual files for d
 
 **Library Author:** Adrian Witas
 
-**Contributors:**
