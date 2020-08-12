@@ -4,5 +4,5 @@ package counter
 type Value struct {
 	Value string
 	Counter
-	Pct int32
+	Pct int32  `json:",omitempty"`
 }

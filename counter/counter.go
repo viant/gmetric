@@ -4,7 +4,7 @@ import "sync/atomic"
 
 //Counter represents a counter
 type Counter struct {
-	Count int64
+	Count int64 `json:",omitempty"`
 }
 
 //CountValue returns count
