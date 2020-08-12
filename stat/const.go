@@ -5,9 +5,13 @@ const (
 	ErrorKey = "error"
 	//CounterValueKey represents counter key
 	CounterValueKey = "count"
+	//CounterMineKey min key
 	CounterMineKey  = "min"
+	//CounterMaxKey max key
 	CounterMaxKey   = "max"
+	//CounterAvgKey avg
 	CounterAvgKey   = "avg"
+	//CounterTimeTakenKey time taken key
 	CounterTimeTakenKey   = "timeTaken"
 
 )
