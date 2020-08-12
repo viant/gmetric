@@ -34,13 +34,13 @@ func NewRouter(URI string, service *Service) *toolbox.ServiceRouter {
 		},
 		toolbox.ServiceRouting{
 			HTTPMethod: "GET",
-			URI:        fmt.Sprintf("%vcounter/{name}/cumulative/{metric}", URI),
+			URI:        fmt.Sprintf("%voperation/{name}/cumulative/{metric}", URI),
 			Handler:    service.LookupOperationCumulativeMetric,
 			Parameters: []string{"name", "metric"},
 		},
 		toolbox.ServiceRouting{
 			HTTPMethod: "GET",
-			URI:        fmt.Sprintf("%vcounter/{name}/recent/{metric}", URI),
+			URI:        fmt.Sprintf("%voperation/{name}/recent/{metric}", URI),
 			Handler:    service.LookupOperationRecentMetric,
 			Parameters: []string{"name", "metric"},
 		},
