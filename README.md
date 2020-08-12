@@ -104,7 +104,6 @@ import (
 
 const (
 	NoSuchKey       = "noSuchKey"
-
 	MyStatsCacheHit       = "cacheHit"
 	MyStatsCacheCollision = "cacheCollision"
 )
