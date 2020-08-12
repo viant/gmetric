@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/viant/gmetric/counter"
 	"github.com/viant/gmetric/stat"
+	"sync/atomic"
 	"time"
 )
 
@@ -53,15 +54,12 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 		return 0
 	}
 	recentIndex := operation.Index(time.Now())
-	counterMetrics := operation.Recent[recentIndex].Counters
-	if metric == stat.CounterValueKey {
-		return operation.Recent[recentIndex].CountValue()
-	}
+	counterMetrics := operation.Recent[recentIndex]
 	valueIndex := s.getMetricValueIndex(metric, operation)
-	if valueIndex >= 0 && valueIndex < len(counterMetrics) {
-		return counterMetrics[valueIndex].CountValue()
-	}
-	return 0
+
+	return s.getCounterValue(metric, counterMetrics, valueIndex)
+
+
 }
 
 //LookupOperationCumulativeMetric returns operation metric cumulative value
@@ -70,15 +68,29 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	if operation == nil {
 		return 0
 	}
-	counterMetrics := operation.Counters
-	if metric == stat.CounterValueKey {
-		return operation.CountValue()
-	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
-	if valueIndex >= 0 && valueIndex < len(counterMetrics) {
-		return counterMetrics[valueIndex].CountValue()
+	return s.getCounterValue(metric, operation.Operation.Operation, valueIndex)
+}
+
+func (s *Service) getCounterValue(metric string, operation *counter.Operation, valueIndex int) int64 {
+	counterMetrics := operation.Counters
+	switch metric {
+	case stat.CounterValueKey:
+		return operation.CountValue()
+	case stat.CounterMineKey:
+		return atomic.LoadInt64(&operation.Min)
+	case stat.CounterMaxKey:
+		return atomic.LoadInt64(&operation.Max)
+	case stat.CounterAvgKey:
+		return int64(atomic.LoadInt32(&operation.Avg))
+	case stat.CounterTimeTakenKey:
+		return atomic.LoadInt64(&operation.TimeTaken)
+	default:
+		if valueIndex >= 0 && valueIndex < len(counterMetrics) {
+			return counterMetrics[valueIndex].CountValue()
+		}
+		return 0
 	}
-	return 0
 }
 
 func (s *Service) getMetricValueIndex(metric string, operation *Operation) int {
