@@ -15,11 +15,11 @@ type Operation struct {
 	*counter.Operation
 	Recent             []*counter.Operation
 	index              int32
-	UnitDuration       time.Duration
+	UnitDuration       time.Duration `json:"-"`
 	Unit               string
-	RecentUnitDuration time.Duration
+	RecentUnitDuration time.Duration `json:"-"`
 	RecentUnit         string
-	Provider           counter.Provider
+	Provider           counter.Provider `json:"-"`
 }
 
 //Begin start metrics
