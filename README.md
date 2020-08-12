@@ -8,21 +8,20 @@ This library is compatible with Go 1.12+
 
 Please refer to [`CHANGELOG.md`](CHANGELOG.md) if you encounter breaking changes.
 
-- [Motivation](#Motivation)
-- [Usage](#Usage)
-- [License](#License)
-- [Credits and Acknowledgements](#Credits-and-Acknowledgements)
+- [Motivation](#motivation)
+- [Usage](#usage)
+- [License](#license)
+- [Credits and Acknowledgements](#credits-and-acknowledgements)
 
 
-<a name="Motivation"></a>
-## Motivation:
+## Motivation
 
-The goal of this project is to provide metrics counters to measure various aspect of the current and recent application behaviours with minimum overhead.  
+The goal of this project is to provide metrics to measure various aspect of the application behaviours with minimum overhead.  
+Application metrics can be viewed as cumulative or recent rolling window values.
 All metrics are locking and memory allocation free to provide best possible performance.
 
-<a name="Usage"></a>
 
-## Usage:
+## Usage
 
 ##### Single metric counter
 
@@ -206,7 +205,6 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKe
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/cacheCollision
 ```
 
-<a name="License"></a>
 ## License
 
 The source code is made available under the terms of the Apache License, Version 2, as stated in the file `LICENSE`.
@@ -214,8 +212,6 @@ The source code is made available under the terms of the Apache License, Version
 Individual files may be made available under their own specific license,
 all compatible with Apache License, Version 2. Please see individual files for details.
 
-
-<a name="Credits-and-Acknowledgements"></a>
 
 ##  Credits and Acknowledgements
 
