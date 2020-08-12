@@ -215,7 +215,7 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/cacheCol
 
 Example metric:
 
-![Example metrics](images/metrics.png =250px)
+![Example metrics](images/metrics.png =250x)
 
 
 
