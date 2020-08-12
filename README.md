@@ -21,7 +21,14 @@ Application metrics can be viewed as cumulative or recent rolling window values.
 All metrics are locking and memory allocation free to provide best possible performance.
 
 
+Example metric:
+
+![Example metrics](images/metrics.png)
+
+
 ## Usage
+
+
 
 ##### Single metric counter
 
@@ -188,7 +195,10 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1
 
 ## cumulative indivual operation multi counter metric value
 
-open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/counter
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/count
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/min
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/avg
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/max
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/error
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/noSuchKey
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/cacheCollision
@@ -196,8 +206,10 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/cach
 
 
 ## recent counter 
-open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/counter
-
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/count
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/min
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/avg
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/mx
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/counter
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/error
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKey
