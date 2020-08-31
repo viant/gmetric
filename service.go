@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/viant/gmetric/counter"
 	"github.com/viant/gmetric/stat"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -55,11 +56,17 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	}
 	recentIndex := operation.Index(time.Now())
 	counterMetrics := operation.Recent[recentIndex]
+	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
+	if isPct {
+		if index := strings.LastIndex(metric, ".");index !=-1 {
+			metric = metric[:index-1]
+		}
+	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
-
+	if isPct {
+		metric = stat.CounterPctKey
+	}
 	return s.getCounterValue(metric, counterMetrics, valueIndex)
-
-
 }
 
 //LookupOperationCumulativeMetric returns operation metric cumulative value
@@ -68,9 +75,19 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	if operation == nil {
 		return 0
 	}
+	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
+	if isPct {
+		if index := strings.LastIndex(metric, ".");index !=-1 {
+			metric = metric[:index-1]
+		}
+	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
+	if isPct {
+		metric = stat.CounterPctKey
+	}
 	return s.getCounterValue(metric, operation.Operation.Operation, valueIndex)
 }
+
 
 func (s *Service) getCounterValue(metric string, operation *counter.Operation, valueIndex int) int64 {
 	counterMetrics := operation.Counters
@@ -85,6 +102,11 @@ func (s *Service) getCounterValue(metric string, operation *counter.Operation, v
 		return int64(atomic.LoadInt32(&operation.Avg))
 	case stat.CounterTimeTakenKey:
 		return atomic.LoadInt64(&operation.TimeTaken)
+	case stat.CounterPctKey:
+		if valueIndex >= 0 && valueIndex < len(counterMetrics) {
+			return int64(atomic.LoadInt32(&counterMetrics[valueIndex].Pct))
+		}
+		return 0
 	default:
 		if valueIndex >= 0 && valueIndex < len(counterMetrics) {
 			return counterMetrics[valueIndex].CountValue()
@@ -92,6 +114,7 @@ func (s *Service) getCounterValue(metric string, operation *counter.Operation, v
 		return 0
 	}
 }
+
 
 func (s *Service) getMetricValueIndex(metric string, operation *Operation) int {
 	var metricValue interface{} = metric

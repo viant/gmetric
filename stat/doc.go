@@ -1,2 +1,2 @@
-//Package stat define generic customized values
+//Package stat define metric stats values
 package stat

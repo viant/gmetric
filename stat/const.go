@@ -13,5 +13,7 @@ const (
 	CounterAvgKey   = "avg"
 	//CounterTimeTakenKey time taken key
 	CounterTimeTakenKey   = "timeTaken"
+	//CounterPctKey pct key
+	CounterPctKey   = ".pct"
 
 )

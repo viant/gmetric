@@ -2,7 +2,7 @@
 
 
 [![Application operation performance metric.](https://goreportcard.com/badge/github.com/viant/gmetric)](https://goreportcard.com/report/github.com/viant/gmetric)
-[![GoDoc](https://godoc.org/github.com/viant/asc?status.svg)](https://godoc.org/github.com/viant/gmetric)
+[![GoDoc](https://godoc.org/github.com/viant/gmetric?status.svg)](https://godoc.org/github.com/viant/gmetric)
 
 This library is compatible with Go 1.12+
 
@@ -188,7 +188,6 @@ open http://127.0.0.1:8080/v1/metrics/operations
 ## indivual operation multi counter
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1
 
-
 ## cumulative indivual operation multi counter metric value
 
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/count
@@ -198,25 +197,23 @@ open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/max
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/error
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/noSuchKey
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/cacheCollision
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/cumulative/cacheCollision.pct
 
-
-
-## recent counter 
+## recent counters
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/count
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/min
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/avg
-open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/mx
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/max
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/counter
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/error
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKey
+open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/noSuchKey.pct
 open http://127.0.0.1:8080/v1/metrics/operations/myMultiCounter1/recent/cacheCollision
 ```
-
 
 Example metric:
 
 ![Example metrics](images/metrics.png)
-
 
 
 ## License
