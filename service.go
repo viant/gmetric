@@ -59,7 +59,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
 	if isPct {
 		if index := strings.LastIndex(metric, ".");index !=-1 {
-			metric = metric[:index-1]
+			metric = metric[:index]
 		}
 	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
@@ -78,7 +78,7 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
 	if isPct {
 		if index := strings.LastIndex(metric, ".");index !=-1 {
-			metric = metric[:index-1]
+			metric = metric[:index]
 		}
 	}
 	valueIndex := s.getMetricValueIndex(metric, operation)
