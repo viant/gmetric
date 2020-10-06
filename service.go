@@ -2,11 +2,12 @@ package gmetric
 
 import (
 	"errors"
-	"github.com/viant/gmetric/counter"
-	"github.com/viant/gmetric/stat"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/viant/gmetric/counter"
+	"github.com/viant/gmetric/stat"
 )
 
 //Service represents operation metrics
@@ -58,7 +59,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	counterMetrics := operation.Recent[recentIndex]
 	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
 	if isPct {
-		if index := strings.LastIndex(metric, ".");index !=-1 {
+		if index := strings.LastIndex(metric, "."); index != -1 {
 			metric = metric[:index]
 		}
 	}
@@ -69,6 +70,17 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	return s.getCounterValue(metric, counterMetrics, valueIndex)
 }
 
+//LookupOperationRecentMetrics returns operation metric current bucket values
+func (s *Service) LookupOperationRecentMetrics(operationName string) counter.Operation {
+	operation := s.LookupOperation(operationName)
+	if operation == nil {
+		return counter.Operation{}
+	}
+	recentIndex := operation.Index(time.Now())
+	counterMetrics := operation.Recent[recentIndex]
+	return *counterMetrics
+}
+
 //LookupOperationCumulativeMetric returns operation metric cumulative value
 func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) int64 {
 	operation := s.LookupOperation(operationName)
@@ -77,7 +89,7 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	}
 	isPct := len(metric) > len(stat.CounterPctKey) && strings.HasSuffix(metric, stat.CounterPctKey)
 	if isPct {
-		if index := strings.LastIndex(metric, ".");index !=-1 {
+		if index := strings.LastIndex(metric, "."); index != -1 {
 			metric = metric[:index]
 		}
 	}
@@ -87,7 +99,6 @@ func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) 
 	}
 	return s.getCounterValue(metric, operation.Operation.Operation, valueIndex)
 }
-
 
 func (s *Service) getCounterValue(metric string, operation *counter.Operation, valueIndex int) int64 {
 	counterMetrics := operation.Counters
@@ -114,7 +125,6 @@ func (s *Service) getCounterValue(metric string, operation *counter.Operation, v
 		return 0
 	}
 }
-
 
 func (s *Service) getMetricValueIndex(metric string, operation *Operation) int {
 	var metricValue interface{} = metric
