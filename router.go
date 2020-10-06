@@ -2,6 +2,7 @@ package gmetric
 
 import (
 	"fmt"
+
 	"github.com/viant/toolbox"
 )
 
@@ -43,6 +44,12 @@ func NewRouter(URI string, service *Service) *toolbox.ServiceRouter {
 			URI:        fmt.Sprintf("%voperation/{name}/recent/{metric}", URI),
 			Handler:    service.LookupOperationRecentMetric,
 			Parameters: []string{"name", "metric"},
+		},
+		toolbox.ServiceRouting{
+			HTTPMethod: "GET",
+			URI:        fmt.Sprintf("%voperation/{name}/recent", URI),
+			Handler:    service.LookupOperationRecentMetrics,
+			Parameters: []string{"name"},
 		},
 	)
 }
