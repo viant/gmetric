@@ -70,7 +70,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	return s.getCounterValue(metric, counterMetrics, valueIndex)
 }
 
-//LookupOperationRecentMetrics returns operation metric current bucket values
+//LookupOperationRecentMetrics returns operation metrics current bucket values
 func (s *Service) LookupOperationRecentMetrics(operationName string) counter.Operation {
 	operation := s.LookupOperation(operationName)
 	if operation == nil {
