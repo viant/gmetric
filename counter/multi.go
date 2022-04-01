@@ -2,6 +2,8 @@ package counter
 
 import (
 	"github.com/viant/toolbox"
+	"sync"
+	"sync/atomic"
 )
 
 //MultiCounter represents multi value counter
@@ -9,6 +11,7 @@ type MultiCounter struct {
 	*Counter
 	Counters []*Value
 	provider Provider
+	locker   *sync.Mutex
 }
 
 //IncrementValue increments counter
@@ -39,12 +42,16 @@ func (c *MultiCounter) incrementValueBy(value interface{}, count, i int64) int64
 		idx = idx % len(c.Counters)
 	}
 	if _, ok := value.(string); !ok {
+		c.locker.Lock()
 		c.Counters[idx].Value = toolbox.AsString(value)
+		c.locker.Unlock()
 	}
 
 	valueCount := c.Counters[idx].IncrementBy(i)
 	if count > 0 {
-		c.Counters[idx].Pct = int32(100 * valueCount / count)
+		atomic.SwapInt32(&c.Counters[idx].Pct, int32(100*valueCount/count))
+	} else {
+		atomic.SwapInt32(&c.Counters[idx].Pct, int32(0))
 	}
 	return count
 }
