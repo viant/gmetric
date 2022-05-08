@@ -1,13 +1,16 @@
-package stat
+package provider
 
-import "github.com/viant/gmetric/counter"
+import (
+	"github.com/viant/gmetric/counter"
+	"github.com/viant/gmetric/stat"
+)
 
 type basic struct{}
 
 func (p basic) Keys() []string {
 	return []string{
-		ErrorKey,
-		Pending,
+		stat.ErrorKey,
+		stat.Pending,
 	}
 }
 
@@ -19,7 +22,7 @@ func (p basic) Map(value interface{}) int {
 	if _, ok := value.(error); ok {
 		return 0
 	}
-	if value == Pending {
+	if value == stat.Pending {
 		return 1
 	}
 	return -1
