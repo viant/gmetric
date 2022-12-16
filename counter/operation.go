@@ -1,6 +1,7 @@
 package counter
 
 import (
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -58,6 +59,7 @@ func NewOperation(timeUnit time.Duration, provider Provider) *Operation {
 		MultiCounter: &MultiCounter{
 			Counter:  &Counter{},
 			provider: provider,
+			locker:   &sync.Mutex{},
 		},
 	}
 	if provider != nil {
