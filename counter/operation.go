@@ -26,6 +26,9 @@ func (o *Operation) Begin(started time.Time) OnDone {
 
 //BeginWithInc begins count an event
 func (o *Operation) BeginWithInc(inc int64, started time.Time) OnDone {
+	if inc == 0 {
+		inc = 1
+	}
 	if o.timeUnit == 0 {
 		o.timeUnit = 1
 	}
