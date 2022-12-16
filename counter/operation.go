@@ -18,29 +18,34 @@ type Operation struct {
 	timeUnit  time.Duration
 }
 
-//Begin begin count an event
-func (b *Operation) Begin(started time.Time) OnDone {
-	if b.timeUnit == 0 {
-		b.timeUnit = 1
+//Begin begins count an event
+func (o *Operation) Begin(started time.Time) OnDone {
+	return o.BeginWithInc(1, started)
+}
+
+//BeginWithInc begins count an event
+func (o *Operation) BeginWithInc(inc int64, started time.Time) OnDone {
+	if o.timeUnit == 0 {
+		o.timeUnit = 1
 	}
-	count := b.Increment()
+	count := o.IncrementBy(inc)
 	return func(end time.Time, values ...interface{}) int64 {
 		values = NormalizeValue(values)
-		elapsed := int64(end.Sub(started) / b.timeUnit)
-		timeTaken := atomic.AddInt64(&b.TimeTaken, elapsed)
+		elapsed := int64(end.Sub(started) / o.timeUnit)
+		timeTaken := atomic.AddInt64(&o.TimeTaken, elapsed)
 		avgTime := time.Duration(timeTaken / count)
-		atomic.StoreInt32(&b.Avg, int32(avgTime))
-		if elapsed > atomic.LoadInt64(&b.Max) {
-			atomic.StoreInt64(&b.Max, elapsed)
+		atomic.StoreInt32(&o.Avg, int32(avgTime))
+		if elapsed > atomic.LoadInt64(&o.Max) {
+			atomic.StoreInt64(&o.Max, elapsed)
 		}
-		min := atomic.LoadInt64(&b.Min)
+		min := atomic.LoadInt64(&o.Min)
 		if elapsed < min || min == 0 {
-			atomic.StoreInt64(&b.Min, elapsed)
+			atomic.StoreInt64(&o.Min, elapsed)
 		}
 
-		if len(values) > 0 && b.provider != nil {
+		if len(values) > 0 && o.provider != nil {
 			for i := range values {
-				b.incrementValueBy(values[i], count, 1)
+				o.incrementValueBy(values[i], count, 1)
 			}
 		}
 		return count
