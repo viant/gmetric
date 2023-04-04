@@ -43,7 +43,12 @@ func (c *MultiCounter) incrementValueBy(value interface{}, count, i int64) int64
 	}
 	if _, ok := value.(string); !ok {
 		c.locker.Lock()
-		c.Counters[idx].Value = toolbox.AsString(value)
+		if custom, ok := value.(CustomCounter); ok {
+			c.Counters[idx].Custom.Aggregate(custom)
+			value = c.Counters[idx].Custom
+		} else {
+			c.Counters[idx].Value = toolbox.AsString(value)
+		}
 		c.locker.Unlock()
 	}
 

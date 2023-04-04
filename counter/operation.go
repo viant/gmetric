@@ -65,11 +65,20 @@ func NewOperation(timeUnit time.Duration, provider Provider) *Operation {
 			locker:   &sync.Mutex{},
 		},
 	}
+	customProvider, _ := provider.(CustomProvider)
 	if provider != nil {
 		op.Counters = make([]*Value, len(provider.Keys()))
 		for i, val := range provider.Keys() {
+			var customCounter CustomCounter
+			if customProvider != nil {
+				customCounter = customProvider.NewCounter()
+			}
 			op.Counters[i] = &Value{
 				Value: val,
+				Counter: Counter{
+					Count:  0,
+					Custom: customCounter,
+				},
 			}
 		}
 	}

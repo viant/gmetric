@@ -7,3 +7,11 @@ type Provider interface {
 	//Keys  returns mapped keys
 	Keys() []string
 }
+
+type CustomCounter interface {
+	Aggregate(value interface{})
+}
+
+type CustomProvider interface {
+	NewCounter() CustomCounter
+}
