@@ -19,19 +19,10 @@ type Service struct {
 	lock *sync.Mutex
 }
 
-// backup in case the Service is constructed without using New
-// this can cause a sync.Mutex leak
-func (s *Service) ensureLock() {
-	if s.lock == nil {
-		s.lock = new(sync.Mutex)
-	}
-}
-
 //OperationCounter register operation counters
 func (s *Service) OperationCounter(location, name, description string, unit, loopbackUnit time.Duration, RecentBuckets int) *Operation {
 	counter := NewOperation(location, name, description, RecentBuckets, loopbackUnit, unit, nil)
 
-	s.ensureLock()
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -43,7 +34,6 @@ func (s *Service) OperationCounter(location, name, description string, unit, loo
 func (s *Service) MultiOperationCounter(location, name, description string, unit, loopbackUnit time.Duration, loopbackSize int, provider counter.Provider) *Operation {
 	counter := NewOperation(location, name, description, loopbackSize, loopbackUnit, unit, provider)
 
-	s.ensureLock()
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -55,7 +45,6 @@ func (s *Service) MultiOperationCounter(location, name, description string, unit
 func (s *Service) Counter(location, name, description string) *Counter {
 	counter := NewCounter(location, name, description)
 
-	s.ensureLock()
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
