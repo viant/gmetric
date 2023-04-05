@@ -3,6 +3,7 @@ package gmetric
 import (
 	"errors"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -14,11 +15,26 @@ import (
 type Service struct {
 	operations []Operation
 	counters   []Counter
+
+	lock *sync.Mutex
+}
+
+// backup in case the Service is constructed without using New
+// this can cause a sync.Mutex leak
+func (s *Service) ensureLock() {
+	if s.lock == nil {
+		s.lock = new(sync.Mutex)
+	}
 }
 
 //OperationCounter register operation counters
 func (s *Service) OperationCounter(location, name, description string, unit, loopbackUnit time.Duration, RecentBuckets int) *Operation {
 	counter := NewOperation(location, name, description, RecentBuckets, loopbackUnit, unit, nil)
+
+	s.ensureLock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	s.operations = append(s.operations, counter)
 	return &counter
 }
@@ -26,6 +42,11 @@ func (s *Service) OperationCounter(location, name, description string, unit, loo
 //MultiOperationCounter register multi value operation counters
 func (s *Service) MultiOperationCounter(location, name, description string, unit, loopbackUnit time.Duration, loopbackSize int, provider counter.Provider) *Operation {
 	counter := NewOperation(location, name, description, loopbackSize, loopbackUnit, unit, provider)
+
+	s.ensureLock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	s.operations = append(s.operations, counter)
 	return &s.operations[len(s.operations)-1]
 }
@@ -33,6 +54,11 @@ func (s *Service) MultiOperationCounter(location, name, description string, unit
 //Counter register counters
 func (s *Service) Counter(location, name, description string) *Counter {
 	counter := NewCounter(location, name, description)
+
+	s.ensureLock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	s.counters = append(s.counters, counter)
 	return &s.counters[len(s.counters)-1]
 }
@@ -160,5 +186,6 @@ func New() *Service {
 	return &Service{
 		operations: make([]Operation, 0),
 		counters:   make([]Counter, 0),
+		lock:       new(sync.Mutex),
 	}
 }
