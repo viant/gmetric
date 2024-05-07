@@ -1,12 +1,13 @@
 package counter
 
 import (
+	"fmt"
 	"github.com/viant/toolbox"
 	"sync"
 	"sync/atomic"
 )
 
-//MultiCounter represents multi value counter
+// MultiCounter represents multi value counter
 type MultiCounter struct {
 	*Counter
 	Counters []*Value
@@ -14,22 +15,22 @@ type MultiCounter struct {
 	locker   *sync.Mutex
 }
 
-//IncrementValue increments counter
+// IncrementValue increments counter
 func (c *MultiCounter) IncrementValue(value interface{}) int64 {
 	return c.IncrementValueBy(value, 1)
 }
 
-//DecrementValue decrements counter by 1
+// DecrementValue decrements counter by 1
 func (c *MultiCounter) DecrementValue(value interface{}) int64 {
 	return c.IncrementValueBy(value, -1)
 }
 
-//IncrementValueBy increments counter
+// IncrementValueBy increments counter
 func (c *MultiCounter) IncrementValueBy(value interface{}, i int64) int64 {
 	return c.incrementValueBy(value, c.Counter.CountValue(), i)
 }
 
-//IncrementValueBy increments counter
+// IncrementValueBy increments counter
 func (c *MultiCounter) incrementValueBy(value interface{}, count, i int64) int64 {
 	if len(c.Counters) == 0 {
 		return 0
@@ -45,13 +46,16 @@ func (c *MultiCounter) incrementValueBy(value interface{}, count, i int64) int64
 		c.locker.Lock()
 		if custom, ok := value.(CustomCounter); ok {
 			c.Counters[idx].Custom.Aggregate(custom)
-			value = c.Counters[idx].Custom
 		} else {
-			c.Counters[idx].Value = toolbox.AsString(value)
+			stringer, ok := value.(fmt.Stringer)
+			if ok {
+				c.Counters[idx].Value = stringer.String()
+			} else {
+				c.Counters[idx].Value = toolbox.AsString(value)
+			}
 		}
 		c.locker.Unlock()
 	}
-
 	valueCount := c.Counters[idx].IncrementBy(i)
 	if count > 0 {
 		atomic.SwapInt32(&c.Counters[idx].Pct, int32(100*valueCount/count))
