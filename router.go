@@ -2,17 +2,28 @@ package gmetric
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/viant/toolbox"
 )
 
 // NewRouter crates service router
 func NewRouter(URI string, service *Service) *toolbox.ServiceRouter {
+	locationURI := ""
+	matchLen := len("/metric/")
+	idx := strings.Index(URI, "/metric/")
+	if idx == -1 {
+		idx = strings.Index(URI, "/metrics/")
+		matchLen = len("/metrics/")
+	}
+	if idx > 0 {
+		locationURI = URI[idx+matchLen:]
+	}
 	return toolbox.NewServiceRouter(
 		toolbox.ServiceRouting{
 			HTTPMethod: "GET",
 			URI:        fmt.Sprintf("%voperations", URI),
-			Handler:    service.FilteredOperationCounters(URI),
+			Handler:    service.FilteredOperationCounters(locationURI),
 			Parameters: []string{},
 		},
 		toolbox.ServiceRouting{

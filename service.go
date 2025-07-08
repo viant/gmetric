@@ -168,14 +168,29 @@ func (s *Service) OperationCounters() []Operation {
 // FilteredOperationCounters returns operation counters
 func (s *Service) FilteredOperationCounters(URI string) func() []Operation {
 	var filtered []Operation
+	var snashpotCount int32
+	return func() []Operation {
+		if len(filtered) == 0 {
+			s.filerOperations(URI, &filtered, &snashpotCount)
+		}
+		return filtered
+	}
+}
+
+func (s *Service) filerOperations(URI string, snapshot *[]Operation, snashpotCount *int32) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	if len(*snapshot) > 0 && int(atomic.LoadInt32(snashpotCount)) == len(s.operations) {
+		return
+	}
+	URI = strings.Trim(URI, "/")
+	var filtered []Operation
 	for _, candidate := range s.operations {
-		if candidate.Location != "" && strings.Contains(candidate.Location, strings.Trim(URI, "/")) {
+		if candidate.Location == "" || URI == "" || strings.Contains(candidate.Location, URI) {
 			filtered = append(filtered, candidate)
 		}
 	}
-	return func() []Operation {
-		return filtered
-	}
+	*snapshot = filtered
 }
 
 // Counters returns counters
