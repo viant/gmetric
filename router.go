@@ -6,13 +6,13 @@ import (
 	"github.com/viant/toolbox"
 )
 
-//NewRouter crates service router
+// NewRouter crates service router
 func NewRouter(URI string, service *Service) *toolbox.ServiceRouter {
 	return toolbox.NewServiceRouter(
 		toolbox.ServiceRouting{
 			HTTPMethod: "GET",
 			URI:        fmt.Sprintf("%voperations", URI),
-			Handler:    service.OperationCounters,
+			Handler:    service.FilteredOperationCounters(URI),
 			Parameters: []string{},
 		},
 		toolbox.ServiceRouting{

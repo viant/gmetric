@@ -11,7 +11,7 @@ import (
 	"github.com/viant/gmetric/stat"
 )
 
-//Service represents operation metrics
+// Service represents operation metrics
 type Service struct {
 	operations []Operation
 	counters   []Counter
@@ -19,7 +19,7 @@ type Service struct {
 	lock *sync.Mutex
 }
 
-//OperationCounter register operation counters
+// OperationCounter register operation counters
 func (s *Service) OperationCounter(location, name, description string, unit, loopbackUnit time.Duration, RecentBuckets int) *Operation {
 	counter := NewOperation(location, name, description, RecentBuckets, loopbackUnit, unit, nil)
 
@@ -30,7 +30,7 @@ func (s *Service) OperationCounter(location, name, description string, unit, loo
 	return &counter
 }
 
-//MultiOperationCounter register multi value operation counters
+// MultiOperationCounter register multi value operation counters
 func (s *Service) MultiOperationCounter(location, name, description string, unit, loopbackUnit time.Duration, loopbackSize int, provider counter.Provider) *Operation {
 	counter := NewOperation(location, name, description, loopbackSize, loopbackUnit, unit, provider)
 
@@ -41,7 +41,7 @@ func (s *Service) MultiOperationCounter(location, name, description string, unit
 	return &s.operations[len(s.operations)-1]
 }
 
-//Counter register counters
+// Counter register counters
 func (s *Service) Counter(location, name, description string) *Counter {
 	counter := NewCounter(location, name, description)
 
@@ -52,7 +52,7 @@ func (s *Service) Counter(location, name, description string) *Counter {
 	return &s.counters[len(s.counters)-1]
 }
 
-//LookupOperation returns operation counters
+// LookupOperation returns operation counters
 func (s *Service) LookupOperation(name string) *Operation {
 	for _, candidate := range s.operations {
 		if candidate.Name == name {
@@ -64,7 +64,7 @@ func (s *Service) LookupOperation(name string) *Operation {
 
 var errMetric = errors.New("metric error")
 
-//LookupOperationRecentMetric returns operation metric current bucket value
+// LookupOperationRecentMetric returns operation metric current bucket value
 func (s *Service) LookupOperationRecentMetric(operationName, metric string) int64 {
 	operation := s.LookupOperation(operationName)
 	if operation == nil {
@@ -85,7 +85,7 @@ func (s *Service) LookupOperationRecentMetric(operationName, metric string) int6
 	return s.getCounterValue(metric, counterMetrics, valueIndex)
 }
 
-//LookupOperationRecentMetrics returns operation metrics current bucket values
+// LookupOperationRecentMetrics returns operation metrics current bucket values
 func (s *Service) LookupOperationRecentMetrics(operationName string) counter.Operation {
 	operation := s.LookupOperation(operationName)
 	if operation == nil {
@@ -96,7 +96,7 @@ func (s *Service) LookupOperationRecentMetrics(operationName string) counter.Ope
 	return *counterMetrics
 }
 
-//LookupOperationCumulativeMetric returns operation metric cumulative value
+// LookupOperationCumulativeMetric returns operation metric cumulative value
 func (s *Service) LookupOperationCumulativeMetric(operationName, metric string) int64 {
 	operation := s.LookupOperation(operationName)
 	if operation == nil {
@@ -150,7 +150,7 @@ func (s *Service) getMetricValueIndex(metric string, operation *Operation) int {
 	return valueIndex
 }
 
-//LookupCounter returns counters
+// LookupCounter returns counters
 func (s *Service) LookupCounter(name string) *Counter {
 	for _, candidate := range s.counters {
 		if candidate.Name == name {
@@ -160,17 +160,30 @@ func (s *Service) LookupCounter(name string) *Counter {
 	return nil
 }
 
-//OperationCounters returns operation counters
+// OperationCounters returns operation counters
 func (s *Service) OperationCounters() []Operation {
 	return s.operations
 }
 
-//Counters returns counters
+// FilteredOperationCounters returns operation counters
+func (s *Service) FilteredOperationCounters(URI string) func() []Operation {
+	var filtered []Operation
+	for _, candidate := range s.operations {
+		if candidate.Location != "" && strings.Contains(candidate.Location, strings.Trim(URI, "/")) {
+			filtered = append(filtered, candidate)
+		}
+	}
+	return func() []Operation {
+		return filtered
+	}
+}
+
+// Counters returns counters
 func (s *Service) Counters() []Counter {
 	return s.counters
 }
 
-//New creates a new metric Service
+// New creates a new metric Service
 func New() *Service {
 	return &Service{
 		operations: make([]Operation, 0),
